@@ -17,8 +17,8 @@ const PokemonPage: NextPage<Props> = ({ pokemon }) => {
 
   const onToggleFavorite = () => {
     localFavorites.toggleFavorite(pokemon.id)
-    setInFavorites( !isInFavorites )
-    if(!isInFavorites) return
+    setInFavorites(!isInFavorites)
+    if (!isInFavorites) return
     confetti({
       zIndex: 999,
       particleCount: 100,
@@ -27,7 +27,7 @@ const PokemonPage: NextPage<Props> = ({ pokemon }) => {
       origin: {
         x: 1,
         y: 0,
-      }
+      },
     })
   }
 
@@ -110,16 +110,27 @@ export const getStaticPaths: GetStaticPaths = async (ctx) => {
       params: { id },
     })),
     // Si no existe enviará un 404
-    fallback: false,
+    // fallback: false,
+    fallback: 'blocking'
   }
 }
 
 export const getStaticProps: GetStaticProps = async ({ params }) => {
   const { id } = params as { id: string }
+  const pokemon = await getPokemonInfo(id)
+  if (!pokemon) {
+    return {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      },
+    }
+  }
   return {
     props: {
-      pokemon: await getPokemonInfo(id)
+      pokemon,
     },
+    revalidate: 86400,
   }
 }
 
